@@ -1,0 +1,81 @@
+CREATE TABLE Users (
+  user_id INT PRIMARY KEY,
+  username VARCHAR(50) NOT NULL,
+  password VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  role ENUM('admin', 'user') DEFAULT 'user'
+);
+
+CREATE TABLE Mobile_Devices (
+  device_id INT PRIMARY KEY,
+  device_name VARCHAR(50) NOT NULL,
+  device_type ENUM('phone', 'tablet') NOT NULL,
+  operating_system VARCHAR(50) NOT NULL,
+  user_id INT,
+  FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+
+CREATE TABLE Applications (
+  app_id INT PRIMARY KEY,
+  app_name VARCHAR(50) NOT NULL,
+  app_version VARCHAR(20) NOT NULL,
+  device_id INT,
+  FOREIGN KEY (device_id) REFERENCES Mobile_Devices(device_id)
+);
+
+CREATE TABLE Logs (
+  log_id INT PRIMARY KEY,
+  device_id INT,
+  event ENUM('install', 'uninstall', 'update') NOT NULL,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (device_id) REFERENCES Mobile_Devices(device_id)
+);
+
+CREATE TABLE Policies (
+  policy_id INT PRIMARY KEY,
+  policy_name VARCHAR(50) NOT NULL,
+  policy_description TEXT,
+  user_id INT,
+  FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+
+CREATE TABLE Policy_Applications (
+  policy_id INT,
+  app_id INT,
+  FOREIGN KEY (policy_id) REFERENCES Policies(policy_id),
+  FOREIGN KEY (app_id) REFERENCES Applications(app_id)
+);
+
+CREATE TABLE Device_Status (
+  device_id INT,
+  status ENUM('active', 'inactive') NOT NULL,
+  last_sync DATETIME,
+  FOREIGN KEY (device_id) REFERENCES Mobile_Devices(device_id)
+);
+
+CREATE TABLE Software_Updates (
+  update_id INT PRIMARY KEY,
+  app_id INT,
+  update_version VARCHAR(20) NOT NULL,
+  release_notes TEXT,
+  release_date DATETIME,
+  FOREIGN KEY (app_id) REFERENCES Applications(app_id)
+);
+
+CREATE TABLE Device_Configurations (
+  config_id INT PRIMARY KEY,
+  device_id INT,
+  configuration_name VARCHAR(50) NOT NULL,
+  configuration_value TEXT,
+  FOREIGN KEY (device_id) REFERENCES Mobile_Devices(device_id)
+);
+
+CREATE TABLE Audit_Trail (
+  audit_id INT PRIMARY KEY,
+  user_id INT,
+  action VARCHAR(50) NOT NULL,
+  action_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  affected_table VARCHAR(50) NOT NULL,
+  affected_id INT,
+  FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
